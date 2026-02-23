@@ -16,7 +16,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { DashboardSquare01Icon, ChartHistogramIcon, CreditCardIcon, Settings05Icon, HelpCircleIcon, File01Icon, ChartLineData01Icon, DollarCircleIcon, UserGroupIcon, CommandIcon, Add01Icon, ShoppingBasket01Icon, GiveBloodIcon, Store01Icon } from "@hugeicons/core-free-icons"
+import { DashboardSquare01Icon, ChartHistogramIcon, CreditCardIcon, Settings05Icon, HelpCircleIcon, File01Icon, ChartLineData01Icon, DollarCircleIcon, UserGroupIcon, CommandIcon, Add01Icon, ShoppingBasket01Icon, GiveBloodIcon, Store01Icon, Archive01Icon } from "@hugeicons/core-free-icons"
 
 const data = {
   user: {
@@ -33,6 +33,13 @@ const data = {
       ),
     },
     {
+      title: "Inventory",
+      url: "/inventory",
+      icon: (
+        <HugeiconsIcon icon={Archive01Icon} strokeWidth={2} />
+      ),
+    },
+    {
       title: "Add Gift Card",
       url: "#",
       icon: (
@@ -41,7 +48,7 @@ const data = {
     },
     {
       title: "Spending",
-      url: "#",
+      url: "/redemption",
       icon: (
         <HugeiconsIcon icon={ShoppingBasket01Icon} strokeWidth={2} />
       ),
