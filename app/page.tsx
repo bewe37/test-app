@@ -48,7 +48,6 @@ export default function HomePage() {
   const [rowsPerPage, setRowsPerPage] = useState(10)
 
   const cards = redemptionData.cards
-  const transactions = redemptionData.transactions
 
   // Summary stats
   const totalCards = cards.length
@@ -72,7 +71,7 @@ export default function HomePage() {
       e.redeemed += c.initialBalance - c.remainingBalance
     }
     return Array.from(map.values()).sort((a, b) => b.remaining - a.remaining)
-  }, [cards, transactions])
+  }, [cards])
 
   // Category filter
   const filteredByCategory = activeCategory === "All"
@@ -138,7 +137,7 @@ export default function HomePage() {
                   { href: "/add-card",    icon: Add01Icon,           label: "Add Gift Cards",   desc: "Active cards" },
                   { href: "/redemption",  icon: ShoppingBasket01Icon, label: "Record Spend",     desc: "Log a purchase made with a gift card" },
                   { href: "/donations",   icon: GiveBloodIcon,        label: "Record Donation",  desc: "Give a card to a recipient in need" },
-                  { href: "#inventory",   icon: Archive01Icon,        label: "View Inventory",   desc: "Browse all cards by store and category" },
+                  { href: "/redemption",  icon: Archive01Icon,        label: "View Inventory",   desc: "Browse all cards by store and category" },
                 ] as const).map(({ href, icon, label, desc }) => (
                   <Link key={label} href={href} className="block">
                     <div className="bg-[#fafafa] rounded-[18px] shadow-[0px_0px_0px_1px_rgba(10,10,10,0.1),0px_1px_2px_0px_rgba(0,0,0,0.05)] pt-[58px] pb-6 px-6 flex flex-col gap-2 hover:bg-[#f0f0f0] transition-colors cursor-pointer">

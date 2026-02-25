@@ -224,7 +224,7 @@ export default function AddCardPage() {
       <AppSidebar variant="inset" />
       <SidebarInset>
 
-        {/* ── Figma-style page header ── */}
+        {/* ── Header ── */}
         <div className="border-b h-12 flex items-center shrink-0 px-0">
           <div className="flex items-center gap-4 pl-5 w-full">
             <SidebarTrigger className="bg-white border border-[#e2e8f0] rounded-[6px] p-2 size-8 flex items-center justify-center -ml-0" />
@@ -294,7 +294,7 @@ export default function AddCardPage() {
                       <HugeiconsIcon icon={Add01Icon} strokeWidth={2} className="size-4" />
                       Add Another Card
                     </button>
-                    <Link href="/inventory" className="w-full">
+                    <Link href="/redemption" className="w-full">
                       <button className="w-full border border-[#e2e8f0] text-sm font-medium px-4 py-2 rounded-[6px] flex items-center justify-center gap-2 hover:bg-[#f5f5f5] transition-colors">
                         View Inventory
                         <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} className="size-4" />
