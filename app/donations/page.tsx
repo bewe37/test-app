@@ -2,282 +2,233 @@
 
 import * as React from "react"
 import { AppSidebar } from "@/components/app-sidebar"
-import { SiteHeader } from "@/components/site-header"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { Separator } from "@/components/ui/separator"
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from "@/components/ui/table"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { DownloadIcon, CalendarIcon, FilterIcon } from "@hugeicons/core-free-icons"
-
+import { DownloadIcon } from "@hugeicons/core-free-icons"
 import donationsData from "./data.json"
 
+// ── Constants ─────────────────────────────────────────────────────────────────
+
+const TIME_PERIODS = ["Last 3 months", "Last 30 days", "Last 7 days"]
+
+function getPeriodCutoff(period: string): Date | null {
+  const now = new Date()
+  if (period === "Last 7 days")    return new Date(now.setDate(now.getDate() - 7))
+  if (period === "Last 30 days")   return new Date(now.setDate(now.getDate() - 30))
+  if (period === "Last 3 months")  return new Date(now.setMonth(now.getMonth() - 3))
+  return null
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
 export default function DonationsPage() {
-  const [filteredData, setFilteredData] = React.useState(donationsData)
+  const [timePeriod, setTimePeriod] = React.useState("Last 3 months")
   const [filters, setFilters] = React.useState({
-    startDate: "",
-    endDate: "",
-    store: "",
-    volunteer: "",
-    recipient: "",
+    startDate: "", endDate: "", store: "", recipient: "",
   })
 
-  // Get unique values for filters
   const uniqueStores = Array.from(new Set(donationsData.map(d => d.store))).sort()
-  const uniqueVolunteers = Array.from(new Set(donationsData.map(d => d.volunteer))).sort()
 
-  // Calculate totals
+  const filteredData = React.useMemo(() => {
+    let data = [...donationsData]
+    const cutoff = getPeriodCutoff(timePeriod)
+    if (cutoff) data = data.filter(d => new Date(d.date) >= cutoff)
+    if (filters.startDate) data = data.filter(d => new Date(d.date) >= new Date(filters.startDate))
+    if (filters.endDate)   data = data.filter(d => new Date(d.date) <= new Date(filters.endDate))
+    if (filters.store)     data = data.filter(d => d.store === filters.store)
+    if (filters.recipient) data = data.filter(d => d.recipient.toLowerCase().includes(filters.recipient.toLowerCase()))
+    return data
+  }, [timePeriod, filters])
+
   const totalCount = filteredData.length
-  const totalValue = filteredData.reduce((sum, donation) => sum + donation.amount, 0)
+  const totalValue = filteredData.reduce((sum, d) => sum + d.amount, 0)
 
-  // Filter data whenever filters change
-  React.useEffect(() => {
-    let filtered = donationsData
-
-    if (filters.startDate) {
-      filtered = filtered.filter(d => new Date(d.date) >= new Date(filters.startDate))
-    }
-    if (filters.endDate) {
-      filtered = filtered.filter(d => new Date(d.date) <= new Date(filters.endDate))
-    }
-    if (filters.store) {
-      filtered = filtered.filter(d => d.store === filters.store)
-    }
-    if (filters.volunteer) {
-      filtered = filtered.filter(d => d.volunteer === filters.volunteer)
-    }
-    if (filters.recipient) {
-      filtered = filtered.filter(d =>
-        d.recipient.toLowerCase().includes(filters.recipient.toLowerCase())
-      )
-    }
-
-    setFilteredData(filtered)
-  }, [filters])
-
-  // Export to CSV
-  const exportToCSV = () => {
+  function exportToCSV() {
     const headers = ["Date", "Store", "Amount", "Volunteer", "Recipient", "Notes"]
-    const csvData = filteredData.map(d => [
-      d.date,
-      d.store,
-      `$${d.amount}`,
-      d.volunteer,
-      d.recipient,
-      d.notes || ""
-    ])
-
-    const csvContent = [
-      headers.join(","),
-      ...csvData.map(row => row.map(cell => `"${cell}"`).join(","))
-    ].join("\n")
-
-    const blob = new Blob([csvContent], { type: "text/csv" })
-    const url = window.URL.createObjectURL(blob)
-    const a = document.createElement("a")
-    a.href = url
-    a.download = `donations-${new Date().toISOString().split("T")[0]}.csv`
-    a.click()
-    window.URL.revokeObjectURL(url)
-  }
-
-  const resetFilters = () => {
-    setFilters({
-      startDate: "",
-      endDate: "",
-      store: "",
-      volunteer: "",
-      recipient: "",
+    const rows = filteredData.map(d => [d.date, d.store, `$${d.amount}`, d.volunteer, d.recipient, d.notes || ""])
+    const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(",")).join("\n")
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }))
+    const a = Object.assign(document.createElement("a"), {
+      href: url, download: `donations-${new Date().toISOString().split("T")[0]}.csv`,
     })
+    a.click(); URL.revokeObjectURL(url)
   }
+
+  const pillInput = "rounded-[26px] bg-white/20 border-white/30 text-white placeholder:text-white/50 h-9 text-sm"
 
   return (
-    <SidebarProvider
-      style={
-        {
-          "--sidebar-width": "calc(var(--spacing) * 72)",
-          "--header-height": "calc(var(--spacing) * 12)",
-        } as React.CSSProperties
-      }
-    >
+    <SidebarProvider>
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader />
-        <div className="flex flex-1 flex-col">
-          <div className="@container/main flex flex-1 flex-col gap-2">
-            <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
-              {/* Summary Cards */}
-              <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 md:grid-cols-2">
-                <Card>
-                  <CardHeader>
-                    <CardDescription>Total Donations Distributed</CardDescription>
-                    <CardTitle className="text-4xl font-bold">{totalCount}</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Gift cards given to recipients
-                    </p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardHeader>
-                    <CardDescription>Total Dollar Value</CardDescription>
-                    <CardTitle className="text-4xl font-bold">
-                      ${totalValue.toLocaleString()}
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground">
-                      Total value distributed to community
-                    </p>
-                  </CardContent>
-                </Card>
+
+        {/* ── Figma-style header ── */}
+        <div className="border-b h-12 flex items-center shrink-0">
+          <div className="flex items-center gap-4 pl-5">
+            <SidebarTrigger className="bg-white border border-[#e2e8f0] rounded-[6px] p-2 size-8 flex items-center justify-center" />
+            <Separator orientation="vertical" className="h-4 bg-[#e5e5e5]" />
+            <span className="font-medium text-[16px] text-[#0a0a0a]">Donations Given</span>
+          </div>
+        </div>
+
+        <div className="flex flex-1 flex-col overflow-auto">
+          <div className="flex flex-col gap-6 p-6">
+
+            {/* ── Time period tabs ── */}
+            <div className="border border-[#cbd5e1] rounded-[6px] inline-flex w-fit bg-white px-[5px] py-1">
+              {TIME_PERIODS.map(period => (
+                <button
+                  key={period}
+                  onClick={() => setTimePeriod(period)}
+                  className={`px-3 py-1.5 text-sm rounded-[4px] font-medium transition-colors ${
+                    timePeriod === period
+                      ? "bg-[#f1f5f9] text-[#0a0a0a]"
+                      : "text-[#a3a3a3] hover:text-[#0a0a0a]"
+                  }`}
+                >
+                  {period}
+                </button>
+              ))}
+            </div>
+
+            {/* ── Stats row ── */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="border border-[#e2e8f0] rounded-[12px] p-5">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium text-[#737373]">Total Donations Distributed</p>
+                  <span className="text-xs bg-[#f1f5f9] text-[#525252] px-2 py-0.5 rounded-full font-medium">→ +12</span>
+                </div>
+                <p className="text-[32px] font-semibold text-[#0a0a0a] mt-1 leading-none">{totalCount}</p>
+                <p className="text-xs text-[#737373] mt-2">Gift cards given to recipients</p>
+              </div>
+              <div className="border border-[#e2e8f0] rounded-[12px] p-5">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-medium text-[#737373]">Total Dollar Value</p>
+                  <span className="text-xs bg-[#f1f5f9] text-[#525252] px-2 py-0.5 rounded-full font-medium">→ +12</span>
+                </div>
+                <p className="text-[32px] font-semibold text-[#0a0a0a] mt-1 leading-none">
+                  ${totalValue.toLocaleString()}
+                </p>
+                <p className="text-xs text-[#737373] mt-2">Total value distributed to community</p>
+              </div>
+            </div>
+
+            {/* ── Donation Log card ── */}
+            <div className="bg-[#ef4444] rounded-[12px] overflow-hidden">
+
+              {/* Card header */}
+              <div className="flex items-center justify-between px-6 py-4">
+                <div>
+                  <p className="text-sm font-semibold text-white">Donation Log</p>
+                  <p className="text-xs text-white/70 mt-0.5">Filter and export donation records</p>
+                </div>
+                <button
+                  onClick={exportToCSV}
+                  className="bg-[#2563eb] text-white text-sm font-medium px-4 py-2 rounded-[6px] flex items-center gap-2 hover:bg-[#1d4ed8] transition-colors"
+                >
+                  <HugeiconsIcon icon={DownloadIcon} strokeWidth={2} className="size-4" />
+                  Export CSV
+                </button>
               </div>
 
-              {/* Filters Card */}
-              <Card className="mx-4 lg:mx-6">
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle>Donation Log</CardTitle>
-                      <CardDescription>Filter and export donation records</CardDescription>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={resetFilters}>
-                        <HugeiconsIcon icon={FilterIcon} strokeWidth={2} />
-                        Clear Filters
-                      </Button>
-                      <Button size="sm" onClick={exportToCSV}>
-                        <HugeiconsIcon icon={DownloadIcon} strokeWidth={2} />
-                        Export CSV
-                      </Button>
-                    </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="start-date">Start Date</Label>
-                      <Input
-                        id="start-date"
-                        type="date"
-                        value={filters.startDate}
-                        onChange={(e) => setFilters({...filters, startDate: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="end-date">End Date</Label>
-                      <Input
-                        id="end-date"
-                        type="date"
-                        value={filters.endDate}
-                        onChange={(e) => setFilters({...filters, endDate: e.target.value})}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="store">Store</Label>
-                      <Select value={filters.store} onValueChange={(value) => setFilters({...filters, store: value})}>
-                        <SelectTrigger id="store">
-                          <SelectValue placeholder="All Stores" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">All Stores</SelectItem>
-                          {uniqueStores.map(store => (
-                            <SelectItem key={store} value={store}>{store}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="volunteer">Volunteer</Label>
-                      <Select value={filters.volunteer} onValueChange={(value) => setFilters({...filters, volunteer: value})}>
-                        <SelectTrigger id="volunteer">
-                          <SelectValue placeholder="All Volunteers" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="">All Volunteers</SelectItem>
-                          {uniqueVolunteers.map(volunteer => (
-                            <SelectItem key={volunteer} value={volunteer}>{volunteer}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="recipient">Recipient</Label>
-                      <Input
-                        id="recipient"
-                        placeholder="Search recipient..."
-                        value={filters.recipient}
-                        onChange={(e) => setFilters({...filters, recipient: e.target.value})}
-                      />
-                    </div>
-                  </div>
+              {/* Filters row */}
+              <div className="px-6 pb-5 grid grid-cols-4 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-white/80">Start Date</Label>
+                  <Input
+                    type="date"
+                    value={filters.startDate}
+                    onChange={e => setFilters({ ...filters, startDate: e.target.value })}
+                    className={`${pillInput} [color-scheme:dark]`}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-white/80">End Date</Label>
+                  <Input
+                    type="date"
+                    value={filters.endDate}
+                    onChange={e => setFilters({ ...filters, endDate: e.target.value })}
+                    className={`${pillInput} [color-scheme:dark]`}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-white/80">Store</Label>
+                  <Select value={filters.store} onValueChange={v => setFilters({ ...filters, store: v })}>
+                    <SelectTrigger className="rounded-[26px] bg-white/20 border-white/30 text-white h-9 text-sm">
+                      <SelectValue placeholder="All Stores" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">All Stores</SelectItem>
+                      {uniqueStores.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-medium text-white/80">Recipient</Label>
+                  <Input
+                    placeholder="Search recipient..."
+                    value={filters.recipient}
+                    onChange={e => setFilters({ ...filters, recipient: e.target.value })}
+                    className={pillInput}
+                  />
+                </div>
+              </div>
 
-                  {/* Donations Table */}
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Date</TableHead>
-                          <TableHead>Store</TableHead>
-                          <TableHead>Amount</TableHead>
-                          <TableHead>Volunteer</TableHead>
-                          <TableHead>Recipient</TableHead>
-                          <TableHead>Notes</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredData.length > 0 ? (
-                          filteredData.map((donation) => (
-                            <TableRow key={donation.id}>
-                              <TableCell className="font-medium">
-                                {new Date(donation.date).toLocaleDateString()}
-                              </TableCell>
-                              <TableCell>{donation.store}</TableCell>
-                              <TableCell>
-                                <Badge variant="secondary">${donation.amount}</Badge>
-                              </TableCell>
-                              <TableCell>{donation.volunteer}</TableCell>
-                              <TableCell>{donation.recipient}</TableCell>
-                              <TableCell className="text-muted-foreground">
-                                {donation.notes}
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        ) : (
-                          <TableRow>
-                            <TableCell colSpan={6} className="h-24 text-center">
-                              No donations found matching your filters.
-                            </TableCell>
-                          </TableRow>
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
+              {/* Table */}
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-white/20 hover:bg-transparent">
+                    <TableHead className="text-xs font-medium text-white/70 py-3 pl-6">Date</TableHead>
+                    <TableHead className="text-xs font-medium text-white/70 py-3">Store</TableHead>
+                    <TableHead className="text-xs font-medium text-white/70 py-3">Amount</TableHead>
+                    <TableHead className="text-xs font-medium text-white/70 py-3">Volunteer</TableHead>
+                    <TableHead className="text-xs font-medium text-white/70 py-3">Recipient</TableHead>
+                    <TableHead className="text-xs font-medium text-white/70 py-3">Notes</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredData.length > 0 ? (
+                    filteredData.map(d => (
+                      <TableRow key={d.id} className="border-white/20 hover:bg-white/10">
+                        <TableCell className="text-sm text-white py-3 pl-6">
+                          {new Date(d.date).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="text-sm text-white py-3">{d.store}</TableCell>
+                        <TableCell className="py-3">
+                          <span className="bg-white/20 text-white text-xs font-semibold px-2.5 py-1 rounded-full">
+                            ${d.amount}
+                          </span>
+                        </TableCell>
+                        <TableCell className="text-sm text-white py-3">{d.volunteer}</TableCell>
+                        <TableCell className="text-sm text-white py-3">{d.recipient}</TableCell>
+                        <TableCell className="text-sm text-white/60 py-3">{d.notes}</TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={6} className="h-24 text-center text-white/70 text-sm">
+                        No donations found matching your filters.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
 
-                  {/* Results Count */}
-                  <div className="mt-4 text-sm text-muted-foreground">
-                    Showing {filteredData.length} of {donationsData.length} donations
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Footer count */}
+              <div className="px-6 py-3 border-t border-white/20">
+                <p className="text-xs text-white/60">
+                  Showing {filteredData.length} of {donationsData.length} donations
+                </p>
+              </div>
+
             </div>
           </div>
         </div>

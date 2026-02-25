@@ -3,10 +3,8 @@
 import { useState, useMemo, useRef, useEffect } from "react"
 import Link from "next/link"
 import { AppSidebar } from "@/components/app-sidebar"
-import { SiteHeader } from "@/components/site-header"
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
@@ -109,7 +107,7 @@ function StoreCombobox({ value, onChange, error }: { value: string; onChange: (v
         onChange={e => { setQuery(e.target.value); onChange(e.target.value); setOpen(true) }}
         onFocus={() => setOpen(true)}
         placeholder="Search or type a store name…"
-        className={error ? "border-destructive" : ""}
+        className={`rounded-[26px] bg-[rgba(229,229,229,0.3)] border-[#e5e5e5] h-9 text-sm text-[#737373] placeholder:text-[#737373] ${error ? "border-destructive" : ""}`}
         autoComplete="off"
       />
       {open && filtered.length > 0 && (
@@ -136,6 +134,8 @@ function StoreCombobox({ value, onChange, error }: { value: string; onChange: (v
 // ── Main Page ──────────────────────────────────────────────────────────────────
 
 export default function AddCardPage() {
+  const [tab, setTab] = useState<"single" | "multiple">("single")
+
   // Single entry state
   const [form, setFormState] = useState<FormData>(EMPTY_FORM)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
@@ -218,40 +218,90 @@ export default function AddCardPage() {
   const csvErrors = csvRows.filter(r => r.status === "error").length
   const latestCard = addedCards[addedCards.length - 1]
 
+  const pillInput = (extra = "") =>
+    `rounded-[26px] bg-[rgba(229,229,229,0.3)] border-[#e5e5e5] h-9 text-sm text-[#737373] placeholder:text-[#737373] ${extra}`
+
   return (
     <SidebarProvider>
       <AppSidebar variant="inset" />
       <SidebarInset>
-        <SiteHeader />
+
+        {/* ── Figma-style page header ── */}
+        <div className="border-b h-12 flex items-center shrink-0 px-0">
+          <div className="flex items-center gap-4 pl-5 w-full">
+            <SidebarTrigger className="bg-white border border-[#e2e8f0] rounded-[6px] p-2 size-8 flex items-center justify-center -ml-0" />
+            <Separator orientation="vertical" className="h-4 bg-[#e5e5e5]" />
+            <span className="font-medium text-[16px] text-[#0a0a0a]">Add Gift Card</span>
+          </div>
+        </div>
+
         <div className="flex flex-1 flex-col overflow-hidden">
 
-          {/* Page header */}
-          <div className="border-b px-6 py-4 shrink-0">
-            <h1 className="text-lg font-semibold">Add Gift Card</h1>
-            <p className="text-sm text-muted-foreground">Drop a CSV on the left to bulk import, or fill in the form to add a single card.</p>
+          {/* ── Tab bar + action buttons ── */}
+          <div className="flex items-center gap-2 px-6 pt-6 pb-0 shrink-0">
+            <div className="flex-1">
+              <div className="border border-[#cbd5e1] rounded-[6px] inline-flex bg-white px-[5px] py-1">
+                <button
+                  onClick={() => setTab("single")}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-[4px] transition-colors ${
+                    tab === "single" ? "bg-[#f1f5f9] text-black" : "text-[#a3a3a3]"
+                  }`}
+                >
+                  Single Card
+                </button>
+                <button
+                  onClick={() => setTab("multiple")}
+                  className={`px-3 py-1.5 text-sm font-medium rounded-[4px] transition-colors ${
+                    tab === "multiple" ? "bg-[#f1f5f9] text-black" : "text-[#a3a3a3]"
+                  }`}
+                >
+                  Multiple Cards
+                </button>
+              </div>
+            </div>
+
+            {pageState === "form" && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => { setFormState(EMPTY_FORM); setFieldErrors({}) }}
+                  className="text-sm font-medium text-[#0a0a0a] px-3 h-8 rounded-[26px] hover:bg-[#f5f5f5] transition-colors"
+                >
+                  Clear
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSubmit}
+                  className="bg-[#0f172a] text-white text-sm font-medium px-4 py-2 rounded-[6px] flex items-center gap-2 hover:bg-[#1e293b] transition-colors"
+                >
+                  <HugeiconsIcon icon={CreditCardIcon} strokeWidth={2} className="size-4" />
+                  Add Gift Card
+                </button>
+              </>
+            )}
           </div>
 
-          {/* Two-column body */}
-          <div className="flex flex-1 overflow-hidden">
+          {/* ── Two-column content area ── */}
+          <div className="flex flex-1 overflow-hidden border border-[#e2e8f0] mx-6 mt-6 mb-4 rounded-[12px]">
 
-            {/* ── Left: Single Entry form ──────────────────────────── */}
-            <div className="flex-1 border-r flex flex-col overflow-y-auto">
+            {/* ── Left: Single Entry form ── */}
+            <div className="flex-1 border-r border-[#e2e8f0] flex flex-col overflow-y-auto">
 
-              {/* ── Success ── */}
+              {/* Success state */}
               {pageState === "success" && latestCard && (
                 <div className="flex flex-1 flex-col justify-between p-6">
                   <div className="space-y-3">
-                    <div className="rounded-lg border border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/40 p-4">
+                    <div className="rounded-lg border border-green-200 bg-green-50 p-4">
                       <div className="flex items-start gap-3">
-                        <div className="mt-0.5 shrink-0 rounded-full bg-green-100 dark:bg-green-900 p-1">
-                          <HugeiconsIcon icon={CheckmarkCircle01Icon} strokeWidth={2} className="size-4 text-green-600 dark:text-green-400" />
+                        <div className="mt-0.5 shrink-0 rounded-full bg-green-100 p-1">
+                          <HugeiconsIcon icon={CheckmarkCircle01Icon} strokeWidth={2} className="size-4 text-green-600" />
                         </div>
                         <div>
-                          <p className="font-medium text-green-900 dark:text-green-100 text-sm">Gift card added!</p>
-                          <p className="mt-0.5 text-sm text-green-700 dark:text-green-300">
+                          <p className="font-medium text-green-900 text-sm">Gift card added!</p>
+                          <p className="mt-0.5 text-sm text-green-700">
                             {latestCard.store} · **** {latestCard.last4} · ${parseFloat(latestCard.amount).toFixed(2)}
                           </p>
-                          <p className="text-xs text-green-600 dark:text-green-400 mt-0.5">
+                          <p className="text-xs text-green-600 mt-0.5">
                             Added by {latestCard.addedBy}{latestCard.notes ? ` · ${latestCard.notes}` : ""}
                           </p>
                         </div>
@@ -262,66 +312,80 @@ export default function AddCardPage() {
                     )}
                   </div>
                   <div className="flex flex-col gap-2 pt-4">
-                    <Button onClick={handleAddAnother} className="w-full">
-                      <HugeiconsIcon icon={Add01Icon} strokeWidth={2} className="mr-2 size-4" />
+                    <button
+                      onClick={handleAddAnother}
+                      className="w-full bg-[#0f172a] text-white text-sm font-medium px-4 py-2 rounded-[6px] flex items-center justify-center gap-2 hover:bg-[#1e293b] transition-colors"
+                    >
+                      <HugeiconsIcon icon={Add01Icon} strokeWidth={2} className="size-4" />
                       Add Another Card
-                    </Button>
+                    </button>
                     <Link href="/inventory" className="w-full">
-                      <Button variant="outline" className="w-full">
+                      <button className="w-full border border-[#e2e8f0] text-sm font-medium px-4 py-2 rounded-[6px] flex items-center justify-center gap-2 hover:bg-[#f5f5f5] transition-colors">
                         View Inventory
-                        <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} className="ml-2 size-4" />
-                      </Button>
+                        <HugeiconsIcon icon={ArrowRight01Icon} strokeWidth={2} className="size-4" />
+                      </button>
                     </Link>
                   </div>
                 </div>
               )}
 
-              {/* ── Duplicate confirm ── */}
+              {/* Duplicate confirm state */}
               {pageState === "confirm-duplicate" && pendingDuplicate && (
                 <div className="flex flex-1 flex-col justify-between p-6">
-                  <div className="rounded-lg border border-yellow-200 bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950/40 p-4">
+                  <div className="rounded-lg border border-yellow-200 bg-yellow-50 p-4">
                     <div className="flex items-start gap-3">
-                      <div className="mt-0.5 shrink-0 rounded-full bg-yellow-100 dark:bg-yellow-900 p-1">
-                        <HugeiconsIcon icon={AlertCircleIcon} strokeWidth={2} className="size-4 text-yellow-600 dark:text-yellow-400" />
+                      <div className="mt-0.5 shrink-0 rounded-full bg-yellow-100 p-1">
+                        <HugeiconsIcon icon={AlertCircleIcon} strokeWidth={2} className="size-4 text-yellow-600" />
                       </div>
                       <div>
-                        <p className="font-medium text-yellow-900 dark:text-yellow-100 text-sm">Possible duplicate</p>
-                        <p className="mt-1 text-sm text-yellow-800 dark:text-yellow-200">
+                        <p className="font-medium text-yellow-900 text-sm">Possible duplicate</p>
+                        <p className="mt-1 text-sm text-yellow-800">
                           A <strong>{pendingDuplicate.store}</strong> card ending in <strong>{pendingDuplicate.last4}</strong> already exists.
                         </p>
-                        <p className="mt-0.5 text-xs text-yellow-700 dark:text-yellow-300">
+                        <p className="mt-0.5 text-xs text-yellow-700">
                           Added {pendingDuplicate.addedDate} by {pendingDuplicate.addedBy} · ${pendingDuplicate.remainingBalance.toFixed(2)} remaining
                         </p>
                       </div>
                     </div>
                   </div>
                   <div className="flex flex-col gap-2 pt-4">
-                    <Button onClick={commitCard} className="w-full">Add Anyway</Button>
-                    <Button variant="outline" className="w-full"
-                      onClick={() => { setPendingDuplicate(null); setPageState("form") }}>
+                    <button
+                      onClick={commitCard}
+                      className="w-full bg-[#0f172a] text-white text-sm font-medium px-4 py-2 rounded-[6px] hover:bg-[#1e293b] transition-colors"
+                    >
+                      Add Anyway
+                    </button>
+                    <button
+                      className="w-full border border-[#e2e8f0] text-sm font-medium px-4 py-2 rounded-[6px] hover:bg-[#f5f5f5] transition-colors"
+                      onClick={() => { setPendingDuplicate(null); setPageState("form") }}
+                    >
                       Go Back &amp; Edit
-                    </Button>
+                    </button>
                   </div>
                 </div>
               )}
 
-              {/* ── Form ── */}
+              {/* Form state */}
               {pageState === "form" && (
                 <div className="flex flex-1 flex-col">
+
+                  {/* Summary section */}
                   <div className="p-6 space-y-4">
-                    <p className="text-sm font-semibold">Summary</p>
+                    <p className="text-sm font-semibold text-[#0a0a0a]">Summary</p>
+
                     <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground">Store</Label>
+                      <Label className="text-xs font-medium text-[#737373]">Store</Label>
                       <StoreCombobox value={form.store} onChange={v => setField("store", v)} error={fieldErrors.store} />
                     </div>
+
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-1.5">
-                        <Label className="text-xs text-muted-foreground">Last 4 Digits</Label>
+                        <Label className="text-xs font-medium text-[#737373]">Last 4 Digits</Label>
                         <Input
                           value={form.last4}
                           onChange={e => setField("last4", e.target.value.replace(/\D/g, "").slice(0, 4))}
                           placeholder="1234" inputMode="numeric" maxLength={4}
-                          className={fieldErrors.last4 ? "border-destructive" : ""}
+                          className={pillInput(fieldErrors.last4 ? "border-destructive" : "")}
                         />
                         {fieldErrors.last4 && <p className="text-xs text-destructive">{fieldErrors.last4}</p>}
                         {!fieldErrors.last4 && liveDuplicate && (
@@ -332,69 +396,71 @@ export default function AddCardPage() {
                         )}
                       </div>
                       <div className="space-y-1.5">
-                        <Label className="text-xs text-muted-foreground">Amount</Label>
+                        <Label className="text-xs font-medium text-[#737373]">Amount</Label>
                         <div className="relative">
-                          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted-foreground text-sm">$</span>
+                          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[#737373] text-sm">$</span>
                           <Input
                             value={form.amount}
                             onChange={e => setField("amount", e.target.value.replace(/[^0-9.]/g, ""))}
                             placeholder="0.00" inputMode="decimal"
-                            className={`pl-7 ${fieldErrors.amount ? "border-destructive" : ""}`}
+                            className={pillInput(`pl-7 ${fieldErrors.amount ? "border-destructive" : ""}`)}
                           />
                         </div>
                         {fieldErrors.amount && <p className="text-xs text-destructive">{fieldErrors.amount}</p>}
                       </div>
                     </div>
+
                     <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground">Date added</Label>
-                      <Input type="date" value={form.dateAdded} onChange={e => setField("dateAdded", e.target.value)} />
+                      <Label className="text-xs font-medium text-[#737373]">Date added</Label>
+                      <Input
+                        type="date"
+                        value={form.dateAdded}
+                        onChange={e => setField("dateAdded", e.target.value)}
+                        className={pillInput()}
+                      />
                     </div>
                   </div>
-                  <Separator />
+
+                  <div className="border-t border-[#e2e8f0]" />
+
+                  {/* Card Details section */}
                   <div className="p-6 space-y-4">
-                    <p className="text-sm font-semibold">Card Details</p>
+                    <p className="text-sm font-semibold text-[#0a0a0a]">Card Details</p>
+
                     <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground">Added by</Label>
+                      <Label className="text-xs font-medium text-[#737373]">Added by</Label>
                       <Input
                         list="volunteers-list"
                         value={form.addedBy}
                         onChange={e => setField("addedBy", e.target.value)}
                         placeholder="Volunteer name"
-                        className={fieldErrors.addedBy ? "border-destructive" : ""}
+                        className={pillInput(fieldErrors.addedBy ? "border-destructive" : "")}
                       />
                       <datalist id="volunteers-list">
                         {VOLUNTEERS.map(v => <option key={v} value={v} />)}
                       </datalist>
                       {fieldErrors.addedBy && <p className="text-xs text-destructive">{fieldErrors.addedBy}</p>}
                     </div>
+
                     <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground">
-                        Notes <span className="text-muted-foreground/60">(optional)</span>
+                      <Label className="text-xs font-medium text-[#737373]">
+                        Notes <span className="text-[#737373]/60">(optional)</span>
                       </Label>
                       <Textarea
                         value={form.notes}
                         onChange={e => setField("notes", e.target.value)}
                         placeholder="Any additional info about this card…"
                         rows={3}
+                        className="rounded-[14px] bg-[rgba(229,229,229,0.3)] border-[#e5e5e5] text-sm text-[#737373] placeholder:text-[#737373] resize-none"
                       />
                     </div>
-                  </div>
-                  <div className="mt-auto border-t p-4 flex items-center justify-end gap-2">
-                    <Button variant="ghost" size="sm"
-                      onClick={() => { setFormState(EMPTY_FORM); setFieldErrors({}) }}>
-                      Clear
-                    </Button>
-                    <Button size="sm" onClick={handleSubmit}>
-                      <HugeiconsIcon icon={CreditCardIcon} strokeWidth={2} className="mr-2 size-3.5" />
-                      Add Gift Card
-                    </Button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* ── Right: Bulk Import drop zone ────────────────────── */}
-            <div className="flex-1 flex flex-col overflow-y-auto">
+            {/* ── Right: Bulk Import drop zone ── */}
+            <div className="flex-1 flex flex-col overflow-y-auto bg-[#f1f5f9]">
 
               {/* Drop area */}
               <div
@@ -406,30 +472,30 @@ export default function AddCardPage() {
                   const f = e.dataTransfer.files[0]; if (f) processFile(f)
                 }}
                 className={`flex flex-col items-center justify-center gap-3 transition-colors
-                  ${csvRows.length ? "py-6 border-b cursor-default" : "flex-1 cursor-pointer"}
-                  ${isDragging ? "bg-primary/5" : csvRows.length ? "bg-muted/30" : "hover:bg-muted/20"}`}
+                  ${csvRows.length ? "py-6 border-b border-[#e2e8f0] cursor-default bg-[#f1f5f9]" : "flex-1 cursor-pointer"}
+                  ${isDragging ? "bg-sky-50" : ""}`}
               >
-                <div className={`rounded-full p-4 transition-colors ${isDragging ? "bg-primary/10" : "bg-muted"}`}>
+                <div className={`rounded-full p-4 bg-[#f5f5f5] transition-colors ${isDragging ? "bg-sky-100" : ""}`}>
                   <HugeiconsIcon
                     icon={csvImportDone ? CheckmarkCircle01Icon : File01Icon}
                     strokeWidth={1.5}
-                    className={`size-8 transition-colors ${isDragging ? "text-primary" : csvImportDone ? "text-green-500" : "text-muted-foreground"}`}
+                    className={`size-8 transition-colors ${isDragging ? "text-sky-600" : csvImportDone ? "text-green-500" : "text-[#737373]"}`}
                   />
                 </div>
                 <div className="text-center">
                   {csvRows.length ? (
-                    <p className="text-sm font-medium">{csvFileName}</p>
+                    <p className="text-sm font-medium text-[#0a0a0a]">{csvFileName}</p>
                   ) : (
                     <>
-                      <p className="text-sm font-medium">
+                      <p className="text-sm font-medium text-[#0a0a0a]">
                         {isDragging ? "Release to upload" : "Drop CSV file here"}
                       </p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-[#737373] mt-1">
                         or{" "}
                         <button
                           type="button"
                           onClick={e => { e.stopPropagation(); fileInputRef.current?.click() }}
-                          className="underline underline-offset-2 hover:text-foreground transition-colors"
+                          className="underline underline-offset-2 hover:text-[#0a0a0a] transition-colors"
                         >
                           browse files
                         </button>
@@ -438,21 +504,19 @@ export default function AddCardPage() {
                   )}
                 </div>
 
-                {/* Format hint shown when empty */}
                 {!csvRows.length && (
-                  <div className="mt-2 rounded-md border bg-background/80 px-4 py-2 text-xs text-muted-foreground font-mono">
+                  <div className="mt-2 rounded-[8px] border border-[#e5e5e5] bg-white/80 px-4 py-2 text-xs text-[#737373] font-mono">
                     store, last4, amount, added_by, notes
                   </div>
                 )}
               </div>
+
               <input ref={fileInputRef} type="file" accept=".csv" className="hidden"
                 onChange={e => { const f = e.target.files?.[0]; if (f) processFile(f) }} />
 
               {/* CSV preview + actions */}
               {csvRows.length > 0 && (
                 <div className="flex flex-col flex-1 p-4 gap-4">
-
-                  {/* Summary row */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-sm font-medium">{csvRows.length} rows</span>
@@ -461,27 +525,31 @@ export default function AddCardPage() {
                       {csvErrors > 0 && <Badge variant="destructive" className="text-xs">{csvErrors} error{csvErrors !== 1 ? "s" : ""}</Badge>}
                     </div>
                     <div className="flex items-center gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => { setCsvRows([]); setCsvFileName(""); setCsvImportDone(false) }}>
+                      <button
+                        className="text-sm font-medium text-[#0a0a0a] px-3 h-8 rounded-[26px] hover:bg-[#e5e5e5] transition-colors"
+                        onClick={() => { setCsvRows([]); setCsvFileName(""); setCsvImportDone(false) }}
+                      >
                         Clear
-                      </Button>
-                      <Button variant="outline" size="sm" onClick={downloadTemplate}>
-                        <HugeiconsIcon icon={DownloadIcon} strokeWidth={2} className="mr-1.5 size-3.5" />
+                      </button>
+                      <button
+                        className="border border-[#e2e8f0] bg-white text-sm font-medium px-3 h-8 rounded-[6px] flex items-center gap-1.5 hover:bg-[#f5f5f5] transition-colors"
+                        onClick={downloadTemplate}
+                      >
+                        <HugeiconsIcon icon={DownloadIcon} strokeWidth={2} className="size-3.5" />
                         Template
-                      </Button>
+                      </button>
                     </div>
                   </div>
 
-                  {/* Import success banner */}
                   {csvImportDone && (
-                    <div className="rounded-lg border border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/40 px-4 py-3 flex items-center gap-3">
+                    <div className="rounded-lg border border-green-200 bg-green-50 px-4 py-3 flex items-center gap-3">
                       <HugeiconsIcon icon={CheckmarkCircle01Icon} strokeWidth={2} className="size-4 text-green-600 shrink-0" />
-                      <p className="text-sm text-green-800 dark:text-green-200">
+                      <p className="text-sm text-green-800">
                         <strong>{importedCount} card{importedCount !== 1 ? "s" : ""}</strong> imported successfully.
                       </p>
                     </div>
                   )}
 
-                  {/* Preview table */}
                   <div className="rounded-md border overflow-auto flex-1">
                     <Table>
                       <TableHeader>
@@ -498,7 +566,7 @@ export default function AddCardPage() {
                       <TableBody>
                         {csvRows.map(row => (
                           <TableRow key={row.rowNum}
-                            className={row.status === "error" ? "bg-destructive/5" : row.status === "duplicate" ? "bg-yellow-50 dark:bg-yellow-950/30" : ""}
+                            className={row.status === "error" ? "bg-destructive/5" : row.status === "duplicate" ? "bg-yellow-50" : ""}
                           >
                             <TableCell className="text-muted-foreground text-xs">{row.rowNum}</TableCell>
                             <TableCell>
@@ -522,31 +590,36 @@ export default function AddCardPage() {
                     </Table>
                   </div>
 
-                  {/* Import action buttons */}
                   {!csvImportDone && (
                     <div className="flex gap-2 shrink-0">
                       {csvValid > 0 && (
-                        <Button onClick={() => handleCSVImport(false)}>
+                        <button
+                          onClick={() => handleCSVImport(false)}
+                          className="bg-[#0f172a] text-white text-sm font-medium px-4 py-2 rounded-[6px] hover:bg-[#1e293b] transition-colors"
+                        >
                           Import Valid ({csvValid})
-                        </Button>
+                        </button>
                       )}
                       {csvDuplicates > 0 && (
-                        <Button variant="outline" onClick={() => handleCSVImport(true)}>
+                        <button
+                          onClick={() => handleCSVImport(true)}
+                          className="border border-[#e2e8f0] text-sm font-medium px-4 py-2 rounded-[6px] hover:bg-[#f5f5f5] transition-colors"
+                        >
                           Import All Except Errors ({csvValid + csvDuplicates})
-                        </Button>
+                        </button>
                       )}
                     </div>
                   )}
                 </div>
               )}
 
-              {/* Empty state download hint */}
+              {/* Download hint */}
               {!csvRows.length && (
-                <div className="p-4 border-t mt-auto">
+                <div className="p-4 border-t border-[#e2e8f0] mt-auto">
                   <button
                     type="button"
                     onClick={downloadTemplate}
-                    className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    className="flex items-center gap-2 text-xs text-[#737373] hover:text-[#0a0a0a] transition-colors"
                   >
                     <HugeiconsIcon icon={DownloadIcon} strokeWidth={2} className="size-3.5" />
                     Download CSV template

@@ -2,9 +2,11 @@
 
 import Link from "next/link"
 import { useMemo } from "react"
+import { Treemap, ResponsiveContainer, Tooltip } from "recharts"
 import { AppSidebar } from "@/components/app-sidebar"
 import { SiteHeader } from "@/components/site-header"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
+import { STORE_CATEGORIES, CATEGORY_RAW, TreemapCell } from "@/lib/treemap"
 import {
   Card, CardContent, CardDescription, CardHeader, CardTitle,
 } from "@/components/ui/card"
@@ -30,6 +32,22 @@ export default function DashboardPage() {
   const totalRemaining = useMemo(() => cards.reduce((s, c) => s + c.remainingBalance, 0), [cards])
   const totalDonatedOut = useMemo(() => donations.reduce((s, d) => s + d.amount, 0), [donations])
   const uniqueRecipients = useMemo(() => new Set(donations.map(d => d.recipient)).size, [donations])
+
+  // Treemap data — all stores with remaining balance
+  const treemapData = useMemo(() =>
+    Array.from(
+      cards.reduce((map, c) => {
+        const cat = STORE_CATEGORIES[c.store] ?? "Other"
+        const e = map.get(c.store) ?? { name: c.store, size: 0, remaining: 0, redeemed: 0, category: cat }
+        e.size      += c.remainingBalance
+        e.remaining += c.remainingBalance
+        e.redeemed  += c.initialBalance - c.remainingBalance
+        map.set(c.store, e)
+        return map
+      }, new Map<string, { name: string; size: number; remaining: number; redeemed: number; category: string }>())
+      .values()
+    ).filter(s => s.remaining > 0),
+  [cards])
 
   // Low balance alert (active cards with < $20 remaining)
   const lowBalanceCards = useMemo(
@@ -134,6 +152,47 @@ export default function DashboardPage() {
                 <p className="text-sm text-muted-foreground">Individuals and families</p>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Value Distribution treemap */}
+          <div className="border border-[#e2e8f0] rounded-[12px] p-5">
+            <p className="text-sm font-semibold text-[#0a0a0a]">Value Distribution</p>
+            <p className="text-xs text-[#737373] mt-0.5">Tile size = remaining balance · hover for details</p>
+            <div className="mt-4">
+              <ResponsiveContainer width="100%" height={220}>
+                <Treemap
+                  data={treemapData}
+                  dataKey="size"
+                  aspectRatio={16 / 9}
+                  content={(props) => <TreemapCell {...props} />}
+                >
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null
+                      const d = payload[0].payload
+                      return (
+                        <div className="bg-white border border-[#e2e8f0] rounded-[8px] shadow-md px-3 py-2 text-sm min-w-[140px]">
+                          <p className="font-semibold text-[#0a0a0a] mb-1">{d.name}</p>
+                          <div className="space-y-0.5 text-xs">
+                            <p className="text-green-600">Remaining: <span className="font-medium">${d.remaining?.toFixed(2)}</span></p>
+                            <p className="text-orange-500">Redeemed: <span className="font-medium">${d.redeemed?.toFixed(2)}</span></p>
+                            <p className="text-[#737373] mt-1">{d.category}</p>
+                          </div>
+                        </div>
+                      )
+                    }}
+                  />
+                </Treemap>
+              </ResponsiveContainer>
+              <div className="flex flex-wrap gap-4 mt-3 justify-center">
+                {Object.entries(CATEGORY_RAW).map(([c, color]) => (
+                  <div key={c} className="flex items-center gap-1.5 text-xs text-[#737373]">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
+                    {c}
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Quick Actions */}
