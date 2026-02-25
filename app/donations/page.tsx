@@ -2,8 +2,7 @@
 
 import * as React from "react"
 import { AppSidebar } from "@/components/app-sidebar"
-import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { Separator } from "@/components/ui/separator"
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table"
@@ -67,15 +66,6 @@ export default function DonationsPage() {
     <SidebarProvider>
       <AppSidebar variant="inset" />
       <SidebarInset>
-
-        {/* ── Header ── */}
-        <div className="border-b h-12 flex items-center shrink-0">
-          <div className="flex items-center gap-4 pl-5">
-            <SidebarTrigger className="bg-white border border-[#e2e8f0] rounded-[6px] p-2 size-8 flex items-center justify-center" />
-            <Separator orientation="vertical" className="h-4 bg-[#e5e5e5]" />
-            <span className="font-medium text-[16px] text-[#0a0a0a]">Donations Given</span>
-          </div>
-        </div>
 
         <div className="flex flex-1 flex-col overflow-auto">
           <div className="flex flex-col gap-6 p-6">

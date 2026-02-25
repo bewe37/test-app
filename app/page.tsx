@@ -126,7 +126,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="flex flex-1 flex-col overflow-auto">
+        <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
           <div className="flex flex-col gap-6 p-6">
 
             {/* ── Quick Actions ── */}
