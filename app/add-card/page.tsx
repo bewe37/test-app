@@ -227,7 +227,7 @@ export default function AddCardPage() {
         {/* ── Header ── */}
         <div className="border-b h-12 flex items-center shrink-0 px-0">
           <div className="flex items-center gap-4 pl-5 w-full">
-            <SidebarTrigger className="bg-white border border-[#e2e8f0] rounded-[6px] p-2 size-8 flex items-center justify-center -ml-0" />
+            <SidebarTrigger className="bg-white rounded-[6px] p-2 size-8 flex items-center justify-center" />
             <Separator orientation="vertical" className="h-4 bg-[#e5e5e5]" />
             <span className="font-medium text-[16px] text-[#0a0a0a]">Add Gift Card</span>
           </div>
@@ -237,7 +237,7 @@ export default function AddCardPage() {
 
           {/* ── Action buttons ── */}
           {pageState === "form" && (
-            <div className="flex items-center justify-end gap-2 px-6 pt-6 pb-0 shrink-0">
+            <div className="flex items-center justify-end gap-2 px-4 sm:px-6 pt-4 sm:pt-6 pb-0 shrink-0">
               <button
                 type="button"
                 onClick={() => { setFormState(EMPTY_FORM); setFieldErrors({}) }}
@@ -257,10 +257,10 @@ export default function AddCardPage() {
           )}
 
           {/* ── Two-column content area ── */}
-          <div className="flex flex-1 overflow-hidden border border-[#e2e8f0] mx-6 mt-6 mb-4 rounded-[12px]">
+          <div className="flex flex-col lg:flex-row flex-1 overflow-auto lg:overflow-hidden border border-[#e2e8f0] mx-4 sm:mx-6 mt-4 sm:mt-6 mb-4 rounded-[12px]">
 
             {/* ── Left: Single Entry form ── */}
-            <div className="flex-1 border-r border-[#e2e8f0] flex flex-col overflow-y-auto">
+            <div className="flex-1 border-b lg:border-b-0 lg:border-r border-[#e2e8f0] flex flex-col overflow-y-auto">
 
               {/* Success state */}
               {pageState === "success" && latestCard && (

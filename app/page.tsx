@@ -120,19 +120,19 @@ export default function HomePage() {
         {/* ── Header ── */}
         <div className="border-b h-12 flex items-center shrink-0 px-0">
           <div className="flex items-center gap-4 pl-5 w-full">
-            <SidebarTrigger className="bg-white border border-[#e2e8f0] rounded-[6px] p-2 size-8 flex items-center justify-center" />
+            <SidebarTrigger className="bg-white rounded-[6px] p-2 size-8 flex items-center justify-center" />
             <Separator orientation="vertical" className="h-4 bg-[#e5e5e5]" />
             <span className="font-medium text-[16px] text-[#0a0a0a]">Home</span>
           </div>
         </div>
 
         <div className="flex flex-1 flex-col overflow-y-auto overflow-x-hidden">
-          <div className="flex flex-col gap-6 p-6">
+          <div className="flex flex-col gap-6 p-4 sm:p-6">
 
             {/* ── Quick Actions ── */}
             <div className="flex flex-col gap-3">
               <p className="text-base font-medium text-[#525252]">Quick Actions</p>
-              <div className="grid grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {([
                   { href: "/add-card",    icon: Add01Icon,           label: "Add Gift Cards",   desc: "Active cards" },
                   { href: "/redemption",  icon: ShoppingBasket01Icon, label: "Record Spend",     desc: "Log a purchase made with a gift card" },
@@ -140,7 +140,7 @@ export default function HomePage() {
                   { href: "/redemption",  icon: Archive01Icon,        label: "View Inventory",   desc: "Browse all cards by store and category" },
                 ] as const).map(({ href, icon, label, desc }) => (
                   <Link key={label} href={href} className="block">
-                    <div className="bg-[#fafafa] rounded-[18px] shadow-[0px_0px_0px_1px_rgba(10,10,10,0.1),0px_1px_2px_0px_rgba(0,0,0,0.05)] pt-[58px] pb-6 px-6 flex flex-col gap-2 hover:bg-[#f0f0f0] transition-colors cursor-pointer">
+                    <div className="bg-[#fafafa] rounded-[18px] shadow-[0px_0px_0px_1px_rgba(10,10,10,0.1),0px_1px_2px_0px_rgba(0,0,0,0.05)] pt-8 sm:pt-[58px] pb-6 px-6 flex flex-col gap-2 hover:bg-[#f0f0f0] transition-colors cursor-pointer">
                       <div className="bg-[rgba(0,133,200,0.1)] rounded-[10px] size-10 flex items-center justify-center shrink-0">
                         <HugeiconsIcon icon={icon} strokeWidth={2} className="size-5 text-[#0085c8]" />
                       </div>
@@ -157,58 +157,46 @@ export default function HomePage() {
             {/* ── Summary ── */}
             <div className="flex flex-col gap-3">
               <p className="text-base font-medium text-[#525252]">Summary</p>
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
                 {/* Total Cards */}
-                <div className="bg-[#fafafa] rounded-[18px] shadow-[0px_0px_0px_1px_rgba(10,10,10,0.1),0px_1px_2px_0px_rgba(0,0,0,0.05)] py-6 flex flex-col gap-4">
-                  <div className="flex items-start justify-between px-6">
-                    <div className="flex flex-col gap-2">
-                      <p className="text-[14px] text-[#737373]">Total Cards</p>
-                      <p className="text-[30px] font-semibold text-[#404040] leading-none">{totalCards}</p>
-                    </div>
-                    <span className="bg-[#bbf7d0] text-[#166534] text-[12px] font-medium px-[7px] py-[2px] rounded-[26px] shrink-0">
+                <div className="border border-[#e2e8f0] rounded-[12px] p-5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium text-[#737373]">Total Cards</p>
+                    <span className="bg-[#bbf7d0] text-[#166534] text-xs font-medium px-2 py-0.5 rounded-full shrink-0">
                       +{activeCount}
                     </span>
                   </div>
-                  <div className="px-6">
-                    <p className="text-[14px] font-medium text-[#525252]">Active cards</p>
-                  </div>
+                  <p className="text-[30px] font-semibold text-[#0a0a0a] mt-1 leading-none">{totalCards}</p>
+                  <p className="text-xs text-[#737373] mt-2">Active cards</p>
                 </div>
 
                 {/* Remaining Value */}
-                <div className="bg-[#fafafa] rounded-[18px] shadow-[0px_0px_0px_1px_rgba(10,10,10,0.1),0px_1px_2px_0px_rgba(0,0,0,0.05)] py-6 flex flex-col gap-4">
-                  <div className="flex items-start justify-between px-6">
-                    <div className="flex flex-col gap-2">
-                      <p className="text-[14px] text-[#737373]">Remaining Value</p>
-                      <p className="text-[30px] font-semibold text-[#404040] leading-none">
-                        ${Math.round(totalRemaining).toLocaleString()}
-                      </p>
-                    </div>
-                    <span className="bg-[#bbf7d0] text-[#166534] text-[12px] font-medium px-[7px] py-[2px] rounded-[26px] shrink-0">
+                <div className="border border-[#e2e8f0] rounded-[12px] p-5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium text-[#737373]">Remaining Value</p>
+                    <span className="bg-[#bbf7d0] text-[#166534] text-xs font-medium px-2 py-0.5 rounded-full shrink-0">
                       +{storeBreakdown.length}
                     </span>
                   </div>
-                  <div className="px-6">
-                    <p className="text-[14px] font-medium text-[#525252]">Available across all cards</p>
-                  </div>
+                  <p className="text-[30px] font-semibold text-[#0a0a0a] mt-1 leading-none">
+                    ${Math.round(totalRemaining).toLocaleString()}
+                  </p>
+                  <p className="text-xs text-[#737373] mt-2">Available across all cards</p>
                 </div>
 
                 {/* Total Redeemed */}
-                <div className="bg-[#fafafa] rounded-[18px] shadow-[0px_0px_0px_1px_rgba(10,10,10,0.1),0px_1px_2px_0px_rgba(0,0,0,0.05)] py-6 flex flex-col gap-4">
-                  <div className="flex items-start justify-between px-6">
-                    <div className="flex flex-col gap-2">
-                      <p className="text-[14px] text-[#737373]">Total Redeemed</p>
-                      <p className="text-[30px] font-semibold text-[#404040] leading-none">
-                        ${Math.round(totalRedeemed).toLocaleString()}
-                      </p>
-                    </div>
-                    <span className="bg-[#bbf7d0] text-[#166534] text-[12px] font-medium px-[7px] py-[2px] rounded-[26px] shrink-0">
+                <div className="border border-[#e2e8f0] rounded-[12px] p-5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-medium text-[#737373]">Total Redeemed</p>
+                    <span className="bg-[#bbf7d0] text-[#166534] text-xs font-medium px-2 py-0.5 rounded-full shrink-0">
                       +{storeBreakdown.length}
                     </span>
                   </div>
-                  <div className="px-6">
-                    <p className="text-[14px] font-medium text-[#525252]">Total value spent or donated out from all cards</p>
-                  </div>
+                  <p className="text-[30px] font-semibold text-[#0a0a0a] mt-1 leading-none">
+                    ${Math.round(totalRedeemed).toLocaleString()}
+                  </p>
+                  <p className="text-xs text-[#737373] mt-2">Total value spent or donated out from all cards</p>
                 </div>
 
               </div>
@@ -269,7 +257,7 @@ export default function HomePage() {
               </div>
 
               {/* Table section */}
-              <div className="mx-4 mb-4 border border-[#e2e8f0] rounded-[8px] overflow-hidden">
+              <div className="mx-4 mb-4 border border-[#e2e8f0] rounded-[8px] overflow-x-auto">
 
               {/* Toolbar */}
               <div className="flex items-center gap-3 px-4 py-3 border-b border-[#e2e8f0] bg-white">
@@ -341,11 +329,11 @@ export default function HomePage() {
               </Table>
 
               {/* Pagination footer */}
-              <div className="flex items-center justify-between px-4 py-3 border-t border-[#e2e8f0] bg-white">
+              <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 border-t border-[#e2e8f0] bg-white">
                 <p className="text-xs text-[#737373]">
                   {filteredStores.length} result{filteredStores.length !== 1 ? "s" : ""}
                 </p>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3">
                   <div className="flex items-center gap-2 text-xs text-[#737373]">
                     <span>Rows per page</span>
                     <select

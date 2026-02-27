@@ -56,31 +56,31 @@ export default function DonationsPage() {
         {/* ── Header ── */}
         <div className="border-b h-12 flex items-center shrink-0">
           <div className="flex items-center gap-4 pl-5">
-            <SidebarTrigger className="bg-white border border-[#e2e8f0] rounded-[6px] p-2 size-8 flex items-center justify-center" />
+            <SidebarTrigger className="bg-white rounded-[6px] p-2 size-8 flex items-center justify-center" />
             <Separator orientation="vertical" className="h-4 bg-[#e5e5e5]" />
             <span className="font-medium text-[16px] text-[#0a0a0a]">Donations Given</span>
           </div>
         </div>
 
         <div className="flex flex-1 flex-col overflow-auto">
-          <div className="flex flex-col gap-6 p-6">
+          <div className="flex flex-col gap-6 p-4 sm:p-6">
 
             {/* ── Stats row ── */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="border border-[#e2e8f0] rounded-[12px] p-5">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-medium text-[#737373]">Total Donations Distributed</p>
-                  <span className="text-xs bg-[#f1f5f9] text-[#525252] px-2 py-0.5 rounded-full font-medium">→ +12</span>
+                  <span className="text-xs bg-[#bbf7d0] text-[#166534] px-2 py-0.5 rounded-full font-medium">→ +12</span>
                 </div>
-                <p className="text-[32px] font-semibold text-[#0a0a0a] mt-1 leading-none">{totalCount}</p>
+                <p className="text-[30px] font-semibold text-[#0a0a0a] mt-1 leading-none">{totalCount}</p>
                 <p className="text-xs text-[#737373] mt-2">Gift cards given to recipients</p>
               </div>
               <div className="border border-[#e2e8f0] rounded-[12px] p-5">
                 <div className="flex items-center justify-between">
                   <p className="text-xs font-medium text-[#737373]">Total Dollar Value</p>
-                  <span className="text-xs bg-[#f1f5f9] text-[#525252] px-2 py-0.5 rounded-full font-medium">→ +12</span>
+                  <span className="text-xs bg-[#bbf7d0] text-[#166534] px-2 py-0.5 rounded-full font-medium">→ +12</span>
                 </div>
-                <p className="text-[32px] font-semibold text-[#0a0a0a] mt-1 leading-none">
+                <p className="text-[30px] font-semibold text-[#0a0a0a] mt-1 leading-none">
                   ${totalValue.toLocaleString()}
                 </p>
                 <p className="text-xs text-[#737373] mt-2">Total value distributed to community</p>
@@ -106,7 +106,7 @@ export default function DonationsPage() {
               </div>
 
               {/* Filters row */}
-              <div className="px-6 py-4 grid grid-cols-4 gap-3 border-b border-[#e2e8f0]">
+              <div className="px-4 sm:px-6 py-4 grid grid-cols-2 sm:grid-cols-4 gap-3 border-b border-[#e2e8f0]">
                 <div className="space-y-1.5">
                   <Label className="text-xs font-medium text-[#737373]">Start Date</Label>
                   <Input
@@ -127,7 +127,7 @@ export default function DonationsPage() {
                 </div>
                 <div className="space-y-1.5">
                   <Label className="text-xs font-medium text-[#737373]">Store</Label>
-                  <Select value={filters.store} onValueChange={v => setFilters({ ...filters, store: v })}>
+                  <Select value={filters.store} onValueChange={v => setFilters({ ...filters, store: v ?? "" })}>
                     <SelectTrigger size="sm" className="rounded-[6px]">
                       <SelectValue placeholder="All Stores" />
                     </SelectTrigger>
@@ -149,6 +149,7 @@ export default function DonationsPage() {
               </div>
 
               {/* Table */}
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
@@ -187,6 +188,7 @@ export default function DonationsPage() {
                   )}
                 </TableBody>
               </Table>
+              </div>{/* end overflow-x-auto */}
 
               {/* Footer count */}
               <div className="px-6 py-3 border-t border-[#e2e8f0]">

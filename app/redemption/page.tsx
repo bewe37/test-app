@@ -180,17 +180,17 @@ export default function InventoryPage() {
         {/* ── Header ── */}
         <div className="border-b h-12 flex items-center shrink-0">
           <div className="flex items-center gap-4 pl-5">
-            <SidebarTrigger className="bg-white border border-[#e2e8f0] rounded-[6px] p-2 size-8 flex items-center justify-center" />
+            <SidebarTrigger className="bg-white rounded-[6px] p-2 size-8 flex items-center justify-center" />
             <Separator orientation="vertical" className="h-4 bg-[#e5e5e5]" />
             <span className="font-medium text-[16px] text-[#0a0a0a]">Card Inventory</span>
           </div>
         </div>
 
         <div className="flex flex-1 flex-col overflow-auto">
-          <div className="flex flex-col gap-6 p-6">
+          <div className="flex flex-col gap-6 p-4 sm:p-6">
 
             {/* ── Stats ── */}
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {[
                 { label: "Total Cards",      value: totalCards,   sub: "All gift cards in system" },
                 { label: "Active Cards",     value: activeCards,  sub: "Cards with remaining balance" },
@@ -199,7 +199,7 @@ export default function InventoryPage() {
               ].map(s => (
                 <div key={s.label} className="border border-[#e2e8f0] rounded-[12px] p-5">
                   <p className="text-xs font-medium text-[#737373]">{s.label}</p>
-                  <p className="text-[28px] font-semibold text-[#0a0a0a] mt-1 leading-none">{s.value}</p>
+                  <p className="text-[30px] font-semibold text-[#0a0a0a] mt-1 leading-none">{s.value}</p>
                   <p className="text-xs text-[#737373] mt-2">{s.sub}</p>
                 </div>
               ))}
@@ -241,6 +241,7 @@ export default function InventoryPage() {
               </div>
 
               {/* Table */}
+              <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow className="bg-[#fafafa] hover:bg-[#fafafa]">
@@ -332,7 +333,7 @@ export default function InventoryPage() {
                                 {showSpend && (
                                   <div className="mb-5 bg-white border border-[#e2e8f0] rounded-[8px] p-4 space-y-3">
                                     <p className="text-sm font-semibold text-[#0a0a0a]">Record a Spend</p>
-                                    <div className="grid grid-cols-3 gap-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                       <div className="space-y-1.5">
                                         <Label className="text-xs font-medium text-[#737373]">Amount ($)</Label>
                                         <Input
@@ -383,7 +384,7 @@ export default function InventoryPage() {
                                 {showDonate && (
                                   <div className="mb-5 bg-white border border-[#e2e8f0] rounded-[8px] p-4 space-y-3">
                                     <p className="text-sm font-semibold text-[#0a0a0a]">Record a Donation Out</p>
-                                    <div className="grid grid-cols-3 gap-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                       <div className="space-y-1.5">
                                         <Label className="text-xs font-medium text-[#737373]">Recipient</Label>
                                         <Input
@@ -511,6 +512,7 @@ export default function InventoryPage() {
                   })}
                 </TableBody>
               </Table>
+              </div>{/* end overflow-x-auto */}
 
               {/* Footer */}
               <div className="px-6 py-3 border-t border-[#e2e8f0]">
